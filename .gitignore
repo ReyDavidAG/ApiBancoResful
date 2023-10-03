@@ -2,3 +2,7 @@
 .vs/BancoRestfulCursoAPI/FileContentIndex/b1b72296-1ecd-4506-9b6b-5ece48356314.vsidx
 
 *.vsidx
+
+*.cache
+
+.vs/BancoRestfulCursoAPI/v17/.suo
