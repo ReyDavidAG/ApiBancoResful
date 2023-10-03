@@ -30,7 +30,6 @@ namespace Application.Features.Clientes.Commands.CreateClienteCommand
             var data = await _repositoryAsync.AddAsync(nuevoRegistro);
 
             return new Response<int>(data.Id);
-
         }
     }
 }
