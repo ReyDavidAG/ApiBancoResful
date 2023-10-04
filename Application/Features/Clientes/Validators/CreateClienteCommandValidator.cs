@@ -1,4 +1,6 @@
 ﻿using Application.Features.Clientes.Commands.CreateClienteCommand;
+using Application.Interfaces;
+using Domain.Entities;
 using FluentValidation;
 using System;
 using System.Collections.Generic;
@@ -10,7 +12,7 @@ namespace Application.Features.Clientes.Validators
 {
     public class CreateClienteCommandValidator : AbstractValidator<CreateClienteCommand>
     {
-        public CreateClienteCommandValidator()
+        public CreateClienteCommandValidator(IRepositoryAsync<Cliente> _repositoryAsync)
         {
             RuleFor(p => p.Nombre)
                 .NotEmpty().WithMessage("{PropertyName} no puede ser vacio.")

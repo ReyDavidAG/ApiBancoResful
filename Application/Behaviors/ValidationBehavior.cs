@@ -17,7 +17,7 @@ namespace Application.Behaviors
         }
         public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
         {
-            if (_validators.Any())
+            if (!_validators.Any())
             {
                 var context = new FluentValidation.ValidationContext<TRequest>(request);
                 var validdationResults = await Task.WhenAll(_validators.Select(v => v.ValidateAsync(context, cancellationToken)));
@@ -25,7 +25,7 @@ namespace Application.Behaviors
 
                 if (failures.Count != 0) 
                 {
-                    throw new Exceptions.ValidationException(failures);
+                    throw new Exceptions.ValidationExceptions(failures);
                 }
             }
             return await next();

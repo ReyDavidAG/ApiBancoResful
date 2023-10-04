@@ -30,7 +30,7 @@ namespace WebAPI.Middlewares
                         //costum application error
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
                     break;
-                    case Application.Exceptions.ValidationException e:
+                    case Application.Exceptions.ValidationExceptions e:
                         //costum application error
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
                         responseModel.Errors = e.Errors;

@@ -1,8 +1,12 @@
 ﻿using Application.Interfaces;
 using Application.Wrappers;
 using AutoMapper;
+using FluentValidation;
 using Domain.Entities;
 using MediatR;
+using Application.Features.Clientes.Validators;
+using System.Net;
+using Application.Exceptions;
 
 namespace Application.Features.Clientes.Commands.CreateClienteCommand
 {
@@ -26,6 +30,13 @@ namespace Application.Features.Clientes.Commands.CreateClienteCommand
         }
         public async Task<Response<int>> Handle(CreateClienteCommand request, CancellationToken cancellationToken)
         {
+            var validator = new CreateClienteCommandValidator(_repositoryAsync);
+            var validationResult = await validator.ValidateAsync(request, cancellationToken);
+            if (!validationResult.IsValid)
+            {
+                var validatorException = new ValidationException(validationResult.Errors);
+                throw new ValidationExceptions(validationResult.Errors);
+            }
             var nuevoRegistro = _mapper.Map<Cliente>(request);
             var data = await _repositoryAsync.AddAsync(nuevoRegistro, cancellationToken);
 
