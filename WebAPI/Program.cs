@@ -22,7 +22,9 @@ builder.Services.AddPersistenceInfraestructure(builder.Configuration);
 #region SharedInfraestructure
 builder.Services.AddSharedInfraestructure(builder.Configuration);
 #endregion
-
+#region Version
+builder.Services.AddApiVersioningExtension();
+#endregion
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
