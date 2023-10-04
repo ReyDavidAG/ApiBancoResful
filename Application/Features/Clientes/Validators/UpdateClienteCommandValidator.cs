@@ -10,10 +10,12 @@ using System.Threading.Tasks;
 
 namespace Application.Features.Clientes.Validators
 {
-    public class CreateClienteCommandValidator : AbstractValidator<CreateClienteCommand>
+    public class UpdateClienteCommandValidator : AbstractValidator<UpdateClienteCommand>
     {
-        public CreateClienteCommandValidator(IRepositoryAsync<Cliente> _repositoryAsync)
+        public UpdateClienteCommandValidator(IRepositoryAsync<Cliente> _repositoryAsync)
         {
+            RuleFor(p => p.Id)
+                .NotEmpty().WithMessage("{PropertyName} no puede ser vacio.");
             RuleFor(p => p.Nombre)
                 .NotEmpty().WithMessage("{PropertyName} no puede ser vacio.")
                 .MaximumLength(80).WithMessage("{PropertyName} no debe de exceder de {MaxLength} caracteres.");
@@ -41,5 +43,3 @@ namespace Application.Features.Clientes.Validators
         }
     }
 }
-
-
