@@ -1,6 +1,7 @@
 ﻿using Domain.Common;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ namespace Domain.Entities
         public string Telefono { get; set; }
         public string Email { get; set; }
         public string Direccion { get; set; }
+        [NotMapped]
         public int Edad
         {
             get
@@ -26,6 +28,10 @@ namespace Domain.Entities
                     this._edad = new DateTime(DateTime.Now.Subtract(this.FechaNacimiento).Ticks).Year - 1;
                 }
                 return this._edad;
+            }
+            set
+            {
+                this._edad = value;
             }
         }
     }
