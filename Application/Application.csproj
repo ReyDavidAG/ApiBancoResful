@@ -18,8 +18,6 @@
 
   <ItemGroup>
     <Folder Include="Dtos\" />
-    <Folder Include="Features\Clientes\Queries\GetAllClientes\" />
-    <Folder Include="Features\Clientes\Queries\GetClienteById\" />
     <Folder Include="Filters\" />
   </ItemGroup>
 
