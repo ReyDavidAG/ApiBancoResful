@@ -4,6 +4,9 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 # User-specific files
+*.cache           # Ignorar archivos con la extensión .cache
+/cache/           # Ignorar el directorio "cache" en la raíz del proyecto
+**/*.cache        # Ignorar todos los archivos con la extensión .cache en cualquier subdirectorio
 *.rsuser
 *.suo
 *.user
