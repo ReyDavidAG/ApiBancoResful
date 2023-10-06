@@ -3,10 +3,11 @@ using Application.Interfaces;
 using Domain.Entities;
 using Domain.Common;
 using System.Reflection;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Persistence.Context
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<AppUser>
     {
         private readonly IDateTimeService _dateTimeService;
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IDateTimeService dateTimeService) : base (options)
@@ -14,6 +15,7 @@ namespace Persistence.Context
             ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
             _dateTimeService = dateTimeService;
         }
+        public DbSet<AppUser> Users { get; set; }
         public DbSet<Cliente> Clientes { get; set; }
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
@@ -35,6 +37,7 @@ namespace Persistence.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+            base.OnModelCreating(modelBuilder);
         }
     }
 }
