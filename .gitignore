@@ -369,3 +369,11 @@ FodyWeavers.xsd
 *.v2
 
 *.bin
+
+*.dll
+
+*.json
+
+*.props
+
+*.txt
