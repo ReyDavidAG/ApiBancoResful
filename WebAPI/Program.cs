@@ -1,5 +1,8 @@
 using Application;
+using Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 using Persistence;
+using Persistence.Context;
 using Shared;
 using WebAPI.Extensions;
 
@@ -18,6 +21,7 @@ builder.Services.AddApplication();
 #endregion
 #region Infraestructure
 builder.Services.AddPersistenceInfraestructure(builder.Configuration);
+builder.Services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
 #endregion
 #region SharedInfraestructure
 builder.Services.AddSharedInfraestructure(builder.Configuration);
