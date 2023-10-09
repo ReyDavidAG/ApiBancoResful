@@ -16,7 +16,8 @@ namespace Application.Mappings
         public GeneralProfile()
         {
             #region Dtos
-            CreateMap<Cliente, ClienteDto>();   
+            CreateMap<Cliente, ClienteDto>();
+            CreateMap<AppUser, UserDatosDto>();
             #endregion
             #region Commands
             CreateMap<CreateClienteCommand, Cliente>(); 
