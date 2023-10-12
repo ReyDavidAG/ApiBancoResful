@@ -15,8 +15,10 @@ namespace Persistence.Context
             ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
             _dateTimeService = dateTimeService;
         }
-        public DbSet<AppUser> Users { get; set; }
+        public DbSet<AppUser> AppUsers { get; set; }
+        public DbSet<User> User { get; set; }
         public DbSet<Cliente> Clientes { get; set; }
+        public DbSet<RefreshTokenEntity> RefreshTokens { get; set; }
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             foreach(var entry in ChangeTracker.Entries<AuditableBaseEntity>())
