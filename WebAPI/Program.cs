@@ -11,6 +11,7 @@ using System.Text;
 using WebAPI.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
+var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIROMENT");
 
 var key = builder.Configuration["ApiSettings:Secreta"];
 //Agregar servicios Application
@@ -35,10 +36,9 @@ builder.Services.AddAuthentication(x =>
     x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(x =>
 {
-    x.RequireHttpsMetadata = false;
-    x.SaveToken = true;
     x.TokenValidationParameters = new TokenValidationParameters
     {
+        ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key)),
         ValidateIssuer = false,
