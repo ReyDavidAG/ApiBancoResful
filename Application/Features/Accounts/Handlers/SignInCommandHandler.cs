@@ -2,6 +2,7 @@
 using Application.Features.Acounts.Commands;
 using Application.Features.Acounts.Validators;
 using Application.Interfaces;
+using Application.Services;
 using Application.Wrappers;
 using AutoMapper;
 using Domain.Dtos;
@@ -11,65 +12,79 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Application.Features.Acounts.Handlers
 {
     public class SignInCommandHandler : IRequestHandler<SignInCommand, Response<UserLoginResponseDto>>
     {
-        private string claveSecreta;
         private readonly UserManager<AppUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IRepositoryAsync<RefreshTokenEntity> _repositoryRefreshToken;
         private readonly IRepositoryAsync<AppUser> _repositoryAsync;
         private readonly IMapper _mapper;
-        public SignInCommandHandler(IConfiguration config,UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IRepositoryAsync<AppUser> repositoryAsync, IMapper mapper)
+        private readonly JwtService _jwtServics;
+        public SignInCommandHandler(JwtService jwtService,UserManager<AppUser> userManager, IRepositoryAsync<RefreshTokenEntity> repositoryRefreshToken , IRepositoryAsync<AppUser> repositoryAsync, IMapper mapper)
         {
             _userManager = userManager;
-            _roleManager = roleManager;
+            _repositoryRefreshToken = repositoryRefreshToken;
             _repositoryAsync = repositoryAsync;
             _mapper = mapper;
-            claveSecreta = config["ApiSettings:Secreta"].ToString();
+            _jwtServics = jwtService;
         }
         public async Task<Response<UserLoginResponseDto>> Handle(SignInCommand request, CancellationToken cancellationToken)
         {
+            
             var validator = new SignInCommandValidator(_repositoryAsync);
             var validatorResult = await validator.ValidateAsync(request, cancellationToken);
             if (!validatorResult.IsValid)
                 throw new ValidationExceptions(validatorResult.Errors);
         
-            var listUsers = _repositoryAsync.ListAsync();
-            var userExist = listUsers.Result.SingleOrDefault(u => u.UserName == request.UserName);
-            var correctPass = _userManager.CheckPasswordAsync(userExist, request.Password);
-            if (userExist == null || correctPass.Result == false)
+            var listUsers = await _repositoryAsync.ListAsync();
+            var userExist = listUsers.SingleOrDefault(u => u.UserName == request.UserName);
+            var correctPass = await _userManager.CheckPasswordAsync(userExist, request.Password);
+            if (userExist == null || correctPass == false)
             {
                 throw new ApiException($"El usuario o contraseña no son correctos.");
             }
 
-            var roles = _userManager.GetRolesAsync(userExist);
-            var managerToken = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(claveSecreta);
+            JwtResponse tokenresult = await _jwtServics.CreateJwTokenAsync(userExist);
+            JwtSecurityToken jwtSecurityToken = tokenresult.Token;
 
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[]
+            UserLoginResponseDto response = new();
+                response.Id = userExist.Id;
+                response.Roles = tokenresult.Roles;
+                response.User =  _mapper.Map<UserDatosDto>(userExist);
+                response.Expires = tokenresult.Expires;
+                response.Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+
+                RefreshTokenEntity refresh = new()
                 {
-                    new Claim(ClaimTypes.Name, userExist.UserName.ToString()),
-                    new Claim(ClaimTypes.Role, roles.Result.FirstOrDefault())
-                }),
-                Expires = DateTime.UtcNow.AddSeconds(10),
-                SigningCredentials = new(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
-            };
+                    IdRefresh = Guid.NewGuid(),
+                    AppUserId = userExist.Id,
+                    Created = DateTime.Now,
+                    Expires = DateTime.Now.AddMinutes(2),
+                    Token = RandomTokenString(),
+                };
+                var resurltRefresh = await _repositoryRefreshToken.AddAsync(refresh, cancellationToken);
 
-            var token = managerToken.CreateToken(tokenDescriptor); //aqui esta el token para guardarlo
+                if (resurltRefresh != null)
+                {
+                    response.refreshExpires = resurltRefresh.Expires;
+                    response.RefreshToken = resurltRefresh.Token;
+                }
+ 
+            return new Response<UserLoginResponseDto>(response);
+        }
+        public static string RandomTokenString()
+        {
+            using var rngCryptoServicesProvider = new RNGCryptoServiceProvider();
+            var randomBytes = new byte[40];
+            rngCryptoServicesProvider.GetBytes(randomBytes);
 
-            UserLoginResponseDto userLoginResponseDto = new()
-            {
-                Token = managerToken.WriteToken(token),
-                User = _mapper.Map<UserDatosDto>(userExist),
-                Expires = tokenDescriptor.Expires,
-            };
-            return new Response<UserLoginResponseDto>(userLoginResponseDto);
+            return BitConverter.ToString(randomBytes).Replace("-", "");
         }
     }
 }
